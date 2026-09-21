@@ -1,0 +1,80 @@
+<！doctype 超文本标记语言>
+<超文本标记语言 朗="zh-CN">
+<头>
+<元 字符集="UTF-8">
+<元 姓名="视口" 内容="宽度=设备宽度，初始比例=1">
+<标题>天气预报</标题>
+<风格>
+*{边距：0；填充：0；框大小：边框}
+正文{font-family：-apple-system，BlinkMacSystemFont，"Segoe用户界面"，无衬线；背景：线性梯度(160deg，#1e3c72，#2a5298)；颜色：#FFF；最小高度：100vh；填充：16px}
+.bar{显示：弯曲；间距：8px；底边距：16px}
+输入{flex:1；填充：12px；边框半径：10px；边框：0；字体大小：15px}
+按钮{填充：12px16px；边框：0；边框半径：10px；背景：#ffd166；颜色：#333；字体粗细：700}
+。卡片{background:rgba(255，255，.12)；边框半径：16px；填充：20px；下边距：12px；背景滤镜：模糊(6px)}
+.Now{文本对齐：居中；填充：24px0}
+.now.tmp{font-size:48px；font-weight:800}
+.now.desc{字体大小：18px；上边距：6px}
+.meta{显示：弯曲；对齐内容：左右空白；上边距：14px；颜色：#e8eefc；字体大小：14px}
+。天{显示：网格；网格模板列：重复(7.1fr)；间距：6px}
+。day{background:rgba(255，255，.1)；边框半径：10px；填充：10px4px；文本对齐：居中；字体大小：12px}
+.day b{display:block；margin-bottom:6px}
+。错误{color：#ffd1d1；文本对齐：居中；填充：20px}
+</风格>
+</头>
+<身体>
+<div 班级="条形图">
+  <输入 身份标识="城市" 占位符="输入城市，如北京/上海/上海">
+  <按钮 onClick="searchCity()">搜索</按钮>
+  <按钮 onClick="useLocation()">定位</按钮>
+</div>
+<div 身份标识="应用程序"><div 班级="卡错误">点“定位”自动获取，或输入城市搜索</div></div>
+
+<脚本>
+Const WMO={0："晴☀️"，1："大部分晴🌤️"，2："局部多云⛅"，3："阴☁️"，45："雾🌫️"，48："雾凇🌫️"，51："毛毛雨🌦️"，53："小雨🌦️"，55："中雨🌧️"，61："小雨🌧️"，63："中雨🌧️"，65："大雨🌧️"，71："小雪🌨️"，73："中雪🌨️"，75："大雪❄️"，80："阵雨🌦️"，81："阵雨🌧️"，82："强阵雨⛈️"，95："雷阵雨⛈️"，96："雷阵雨伴冰雹⛈️"，99："强雷暴-0"}；
+函数wmo(c){return WMO[c]||("代码"+c)；}
+
+异步函数加载(lat，lon，name){
+Const url='https://api.open-meteo.com/v1/forecast?latitude=${lat}&经度=${lon}'+
+'&current=temperature_2m，视在温度，湿度，天气代码，风速_10m，is_day'+
+'&daily=weather_code，temperature_2m_max，temperature_2m_min&timezone=auto&forecast_days=7'；
+尝试{
+Const r=等待获取(url)；const d=等待r.json()；
+Const cur=d.current，dy=d.daily；
+让超文本标记语言='<div 班级="立即卡"><div>${name||(当前时间)}</div><div 班级="tmp">${cur.temperature_2m}°C</div>'+
+'<div 班级="描述">${wmo(当前天气代码)}</div>'+
+'<div 班级="元"><跨度>体感${当前表观温度}°C</跨度><跨度>湿度${cur.humidity}%</跨度><水疗 n>风速${cur.wind_speed_10m}km/h</跨度></div></div>'；
+超文本标记语言+='<div 班级="卡日">'；
+dy.time.forEach((t，i)=>{
+常数wk=["周日"，"周一"，"周二"，"周三"，"周四"，"周五"，"周六"][新日期(t).getDay()]；
+常数标签=i====0？"今天"：周；
+超文本标记语言+='<div 班级="天"><b>${标签}</b>${wmo(dy.Weather_code[i])}<溴>${dy.温度_2m_min[i]}°/${dy.温度_2m_max[i]}°</div>'；
+    });
+超文本标记语言+='</div>'；
+文件。getElementById('app').innerHTML=html；
+}渔获物(e){
+文件。getElementById('app').innerHTML='<div 班级="卡错误">加载失败，换网络或稍后重试</div>'；
+  }
+}
+
+函数useLocation(){
+if(！navigator.geolocation){alert("此环境不支持定位")；返回；}
+领航员。地理位置.getCurrentPosition(异步p=>{
+    // 反查城市名（Open-Meteo 地理反查可省略，这里用坐标就近）
+载荷(P.coords.纬度，P.coords。经度，"我的位置")；
+}，()=>alert("定位被拒绝，请手动搜城市"))；
+}
+
+异步函数searchCity(){
+常量Q=document.getElementById(“城市”)。价值。修剪()；
+if(！q)返回；
+尝试{
+常数g=等待提取('https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&language=zh')；
+常数j=等待g.json()；
+如果(！J.结果||！j。结果。长度){document.getElementById('app').innerHTML='<div 班级="卡错误">没找到城市</div>'；返回；}
+    const c=j.results[0];
+load(c.latitude，c.longitude，'${c.name||q}${c.country||"}')；
+}catch(e){document.getElementById('app')。innerHTML='<div 班级="卡错误">搜索失败</div>'；}
+}
+</脚本>
+</身体>
+</超文本标记语言>
